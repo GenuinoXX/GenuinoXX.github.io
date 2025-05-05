@@ -23,6 +23,10 @@
         var point = new BMap.Point(lng, lat)
         map.centerAndZoom(point, 10)
         map.addControl(new BMap.NavigationControl())
+        map.addControl(new BMap.MapTypeControl())
+        map.addControl(new BMap.GeolocationControl())
+        map.addControl(new BMap.ScaleControl())
+        map.addControl(new BMap.OverviewMapControl())
         map.enableScrollWheelZoom(true)
 
         function sendToMap(data) {
