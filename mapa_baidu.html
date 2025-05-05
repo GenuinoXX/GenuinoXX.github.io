@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa Baidu</title>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=1Vkcxd0Q6iomR9TI8zNfzhwXWdeBYAd2&type=webgl"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=1Vkcxd0Q6iomR9TI8zNfzhwXWdeBYAd2"></script>
 </head>
 <style>
     #map {
@@ -29,6 +29,7 @@
         map.addControl(new BMap.OverviewMapControl())
         map.enableScrollWheelZoom(true)
         map.enableContinuousZoom()
+        map.enableInertialDragging()
 
         function sendToMap(data) {
             if(window.WeixinJSBridge){
