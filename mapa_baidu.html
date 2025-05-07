@@ -21,7 +21,7 @@
     <div id="map"></div>
     <script>
         function decodeBase64ToJson(datos) {
-            const jsonStr = atob(datos)
+            const jsonStr = decodeURIComponent(atob(datos))
             return JSON.parse(jsonStr)
         }
 
