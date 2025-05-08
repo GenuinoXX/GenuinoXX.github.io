@@ -20,15 +20,18 @@
 <body>
     <div id="map"></div>
     <script>
-        function decodeBase64ToJson(datos) {
-            const jsonStr = decodeURIComponent(atob(datos))
-            return JSON.parse(jsonStr)
-        }
-
         const params = new URLSearchParams(window.location.search)
         const lat = parseFloat(params.get("lat") || 39.915)
         const lng = parseFloat(params.get("lng") || 116.404)
-        const data = params.get("data")
+        const data = params.get("pois")
+
+        let pois = []
+
+        try {
+            pois = JSON.parse(decodeURIComponent(data))
+        }catch(e) {
+            console.error("Error al parsear POIs:", e)
+        }
 
         const map = new BMap.Map("map", {
             enableMapClick: false
@@ -43,27 +46,24 @@
         map.addControl(new BMap.NavigationControl())
         map.addControl(new BMap.ScaleControl())
 
-        if(data) {
-            const poiData = decodeBase64ToJson(data)
+        pois.forEach(poi => {
+            const poiPoint = new BMap.Point(poi.lng, poi.lat)
+            const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32))
+            const marker = new BMap.Marker(poiPoint, {icon})
+            marker.setTitle(poi.name)
+            map.addOverlay(marker)
 
-            poiData.forEach(poi => {
-                const point = new BMap.Point(poi.lng, poi.lat)
-                const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32))
-                const marker = new BMap.Marker(point, {icon})
+            const toggle = () => {
+                if(map.getZoom() < poi.zoom) {
+                    marker.hide()
+                }else{
+                    marker.show()
+                }
+            }
 
-                map.addOverlay(marker)
-
-                map.addEventListener("zoomend", function() {
-                    if(map.getZoom() < poi.zoom) {
-                        marker.hide()
-                    }else{
-                        marker.show()
-                    }
-                })
-
-                marker.setTitle(poi.name)
-            })
-        }
+            toggle()
+            map.addEventListener("zoomend", toggle)
+        })
 
         function sendToMap(data) {
             if(window.WeixinJSBridge){
