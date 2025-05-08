@@ -20,25 +20,23 @@
 <body>
     <div id="map"></div>
     <script>
-        const params = new URLSearchParams(window.location.search)
-        const lat = parseFloat(params.get("lat") || 39.915)
-        const lng = parseFloat(params.get("lng") || 116.404)
-        const data = params.get("pois")
+        var pois
 
-        let pois = []
-
-        try {
-            pois = JSON.parse(decodeURIComponent(data))
-        }catch(e) {
-            console.error("Error al parsear POIs:", e)
-        }
+        document.addEventListener("WeixinJSBridgeReady", function() {
+            window.WeixinJSBridge.on("message", function(event) {
+                const data = event.data
+                if(data && data.type === "pois") {
+                    pois = data.data
+                }
+            })
+        })
 
         const map = new BMap.Map("map", {
             enableMapClick: false
         })
 
-        var point = new BMap.Point(lng, lat)
-        map.centerAndZoom(point, 8)
+        const center = pois[0] ? new BMap.Point(pois[0].lng, pois[0].lat) : new BMap.Point(116.404, 39.915);
+        map.centerAndZoom(center, 8)
         map.enableAutoResize()
         map.enableContinuousZoom()
         map.enableInertialDragging()
@@ -63,26 +61,6 @@
 
             toggle()
             map.addEventListener("zoomend", toggle)
-        })
-
-        function sendToMap(data) {
-            if(window.WeixinJSBridge){
-                window.WeixinJSBridge.invoke("postMesasage", data)
-            }else{
-                document.addEventListener("WeixinJSBridgeReady", function() {
-                    window.WeixinJSBridge.invoke("postMessage", data)
-                }, false)
-            }
-        }
-
-        map.addEventListener("click", function(e) {
-            var poiData = {
-                type: "poiClick",
-                name: "Nombre",
-                lat: e.latlng.lat,
-                lng: e.latlng.lng
-            }
-            sendToMap(poiData)
         })
     </script>
 </body>
