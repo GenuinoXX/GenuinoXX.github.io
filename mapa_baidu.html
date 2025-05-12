@@ -20,57 +20,50 @@
 <body>
     <div id="map"></div>
     <script>
-        var pois = [];
-      
-        function renderMap(pois) {
-          const map = new BMap.Map("map", {
-            enableMapClick: false
-          });
-      
-          const center = pois[0]
-            ? new BMap.Point(pois[0].lng, pois[0].lat)
-            : new BMap.Point(116.404, 39.915);
-      
-          map.centerAndZoom(center, 8);
-          map.enableAutoResize();
-          map.enableContinuousZoom();
-          map.enableInertialDragging();
-          map.enableScrollWheelZoom();
-      
-          map.addControl(new BMap.NavigationControl());
-          map.addControl(new BMap.ScaleControl());
-      
-          pois.forEach(poi => {
-            const poiPoint = new BMap.Point(poi.lng, poi.lat);
-            const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32));
-            const marker = new BMap.Marker(poiPoint, { icon });
-            marker.setTitle(poi.name);
-            map.addOverlay(marker);
-      
-            const toggle = () => {
+      var map = new BMap.Map("map", {
+          enableMapClick: false
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const encodedPois = params.get("pois");
+      let pois = [];
+
+      try {
+          if (encodedPois) {
+              const jsonStr = atob(decodeURIComponent(encodedPois));
+              pois = JSON.parse(jsonStr);
+          }
+      } catch (e) {
+          console.error("Error al decodificar los POIs:", e);
+      }
+
+      const center = pois[0] ? new BMap.Point(pois[0].lng, pois[0].lat) : new BMap.Point(116.404, 39.915);
+      map.centerAndZoom(center, 8);
+      map.enableAutoResize();
+      map.enableScrollWheelZoom();
+      map.enableInertialDragging();
+      map.enableContinuousZoom();
+      map.addControl(new BMap.NavigationControl());
+      map.addControl(new BMap.ScaleControl());
+
+      pois.forEach(poi => {
+          const poiPoint = new BMap.Point(poi.lng, poi.lat);
+          const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32));
+          const marker = new BMap.Marker(poiPoint, { icon });
+          marker.setTitle(poi.name);
+          map.addOverlay(marker);
+
+          const toggle = () => {
               if (map.getZoom() < poi.zoom) {
-                marker.hide();
+                  marker.hide();
               } else {
-                marker.show();
+                  marker.show();
               }
-            };
-      
-            toggle();
-            map.addEventListener("zoomend", toggle);
-          });
-        }
-      
-        // Esperar a recibir los POIs desde el MiniProgram
-        document.addEventListener("WeixinJSBridgeReady", function () {
-          window.WeixinJSBridge.on("message", function (event) {
-            const data = event.data;
-            if (data && data.type === "pois") {
-              pois = data.data;
-              renderMap(pois); // Solo cuando los POIs estén disponibles
-            }
-          });
-        });
-      </script>
-      
+          };
+
+          toggle();
+          map.addEventListener("zoomend", toggle);
+      });
+    </script>    
 </body>
 </html>
