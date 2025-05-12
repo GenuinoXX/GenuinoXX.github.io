@@ -44,15 +44,6 @@
         : new BMap.Point(116.404, 39.915);
       map.centerAndZoom(center, 8);
       map.enableScrollWheelZoom();
-      map.setMapStyleV2({
-        styleJson: [
-          {
-            "featureType": "land",
-            "elementType": "labels",
-            "visibility": "off"
-          }
-        ]
-      })
       map.addControl(new BMap.NavigationControl());
       map.addControl(new BMap.ScaleControl());
 
