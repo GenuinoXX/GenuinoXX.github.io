@@ -44,6 +44,20 @@
         : new BMap.Point(116.404, 39.915);
       map.centerAndZoom(center, 8);
       map.enableScrollWheelZoom();
+      map.setMapStyleV2({
+        styleJson: [
+          {
+            "featureType": "poi",  // Todos los puntos de interés predeterminados
+            "elementType": "all",
+            "visibility": "off"
+          },
+          {
+            "featureType": "land",
+            "elementType": "labels",
+            "visibility": "off"
+          }
+        ]
+      })
       map.addControl(new BMap.NavigationControl());
       map.addControl(new BMap.ScaleControl());
 
@@ -53,6 +67,19 @@
         const marker = new BMap.Marker(point, { icon });
         marker.setTitle(poi.name);
         map.addOverlay(marker);
+
+        const label = new BMap.Label(poi.name, {
+          position: poiPoint,
+          offset: new BMap.Size(-20, 25)
+        })
+        label.setStyle({
+          color: "#000",
+          fontSize: "12px",
+          backgroundColor: "transparent",
+          border: "none",
+          textAlign: "center"
+        })
+        map.addOverlay(label)
 
         const toggle = () => {
           if (map.getZoom() < poi.zoom) {
