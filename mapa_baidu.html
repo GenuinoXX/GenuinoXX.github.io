@@ -54,19 +54,6 @@
         marker.setTitle(poi.name);
         map.addOverlay(marker);
 
-        const label = new BMap.Label(poi.name, {
-          position: poiPoint,
-          offset: new BMap.Size(-20, 25)
-        })
-        label.setStyle({
-          color: "#000",
-          fontSize: "12px",
-          backgroundColor: "transparent",
-          border: "none",
-          textAlign: "center"
-        })
-        map.addOverlay(label)
-
         const toggle = () => {
           if (map.getZoom() < poi.zoom) {
             marker.hide();
