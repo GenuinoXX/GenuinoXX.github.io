@@ -88,12 +88,12 @@
           if (map.getZoom() < poi.zoom) {
             marker.hide()
             
-            if (map.getZoom() < poi.zoom) {
+            if (map.getZoom() < (poi.zoom+2)) {
               label.hide()
             }
           } else {
             marker.show()
-            
+
               if (map.getZoom() > (poi.zoom+2)) {
                 label.show()
               }
