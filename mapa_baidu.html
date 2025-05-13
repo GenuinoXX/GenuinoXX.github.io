@@ -62,23 +62,41 @@
       map.addControl(new BMap.ScaleControl());
 
       pois.forEach(poi => {
-        const point = new BMap.Point(poi.lng, poi.lat);
-        const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32));
-        const marker = new BMap.Marker(point, { icon });
-        marker.setTitle(poi.name);
-        map.addOverlay(marker);
+        const poiPoint = new BMap.Point(poi.lng, poi.lat)
+
+        const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32))
+        const marker = new BMap.Marker(poiPoint, { icon })
+        marker.setTitle(poi.name)
+        map.addOverlay(marker)
+
+        const label = new BMap.Label(poi.name, {
+          position: poiPoint,
+          offset: new BMap.Size(-20, 25)
+        })
+
+        label.setStyle({
+          color: "#000",
+          fontSize: "12px",
+          backgroundColor: "transparent",
+          border: "none",
+          textAlign: "center"
+        })
+
+        map.addOverlay(label)
 
         const toggle = () => {
           if (map.getZoom() < poi.zoom) {
-            marker.hide();
+            marker.hide()
+            label.hide()
           } else {
-            marker.show();
+            marker.show()
+            label.show()
           }
-        };
+        }
 
-        toggle();
-        map.addEventListener("zoomend", toggle);
-      });
+        toggle()
+        map.addEventListener("zoomend", toggle)
+      })
     }
 
     fetchPOIs();
