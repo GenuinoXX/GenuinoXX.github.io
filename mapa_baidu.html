@@ -74,7 +74,7 @@
 
         const label = new BMap.Label(poi.name, {
           position: poiPoint,
-          offset: new BMap.Size(-32, 34)  // centrado horizontalmente y debajo del icono
+          offset: new BMap.Size(-32, 36)  // centrado horizontalmente y debajo del icono
         })
 
         label.setStyle({
@@ -84,8 +84,10 @@
           backgroundColor: "transparent",
           border: "none",
           textAlign: "center",
-          lineHeight: "18px"
-        })
+          lineHeight: "16px",
+          width: "64px",               // ancho igual al icono
+          whiteSpace: "normal"
+        });
 
         map.addOverlay(label);
 
