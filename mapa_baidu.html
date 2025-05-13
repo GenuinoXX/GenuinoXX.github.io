@@ -96,7 +96,7 @@
       function updateLabelsVisibility() {
         const zoom = map.getZoom();
         const screenPoints = [];
-        const threshold = 50; // Distancia mínima en píxeles para mostrar etiquetas
+        const threshold = 75; // Distancia mínima en píxeles para mostrar etiquetas
 
         markersWithLabels.forEach(({ marker, label, point, minZoom }) => {
           if (zoom < minZoom) {
