@@ -87,10 +87,16 @@
         const toggle = () => {
           if (map.getZoom() < poi.zoom) {
             marker.hide()
-            label.hide()
+            
+            if (map.getZoom() < poi.zoom) {
+              label.hide()
+            }
           } else {
             marker.show()
-            label.show()
+            
+              if (map.getZoom() > (poi.zoom+2)) {
+                label.show()
+              }
           }
         }
 
