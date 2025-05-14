@@ -93,13 +93,15 @@
         markersWithLabels.push({ marker, label, point: poiPoint, minZoom: poi.zoom });
 
         marker.addEventListener("click", () => {
-          if (window.WeixinJSBridge) {
+          if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
             window.WeixinJSBridge.invoke("postMessage", {
               type: "openDescription",
               name: poi.name
             });
+          } else {
+            console.warn("WeixinJSBridge no disponible");
           }
-        });
+        })
       });
 
       function updateLabelsVisibility() {
