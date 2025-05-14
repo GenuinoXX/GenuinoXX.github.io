@@ -106,12 +106,8 @@
           };
 
           console.log("Enviando mensaje:", message); // 🔍 Esto debe aparecer en consola
-
-          if (window.wechatReady && window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
-            window.WeixinJSBridge.invoke("postMessage", message);
-          } else {
-            window.parent.postMessage(message, "*");
-          }
+          window.parent.postMessage(message, "*");
+          
         });
       });
 
