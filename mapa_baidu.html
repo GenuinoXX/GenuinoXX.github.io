@@ -105,10 +105,18 @@
             name: poi.name
           };
 
-          console.log("Enviando mensaje:", message); // 🔍 Esto debe aparecer en consola
-          window.parent.postMessage(message, "*");
-          
-        });
+          // Intenta ambos métodos por compatibilidad
+          if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
+            console.log("Enviando mensaje con WeixinJSBridge");
+            WeixinJSBridge.invoke('postMessage', { data: [message] });
+          }
+
+          // Siempre enviar por window.parent.postMessage
+          if (window.parent) {
+            console.log("Enviando mensaje con window.parent.postMessage");
+            window.parent.postMessage({ data: [message] }, "*");
+          }
+        })
       });
 
       function updateLabelsVisibility() {
