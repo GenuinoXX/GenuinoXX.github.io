@@ -45,7 +45,6 @@
       map.centerAndZoom(center, 10);
       map.enableScrollWheelZoom();
 
-      // Ocultar iconos predeterminados de Baidu
       map.setMapStyle({
         styleJson: [
           {
@@ -74,7 +73,7 @@
 
         const label = new BMap.Label(poi.name, {
           position: poiPoint,
-          offset: new BMap.Size(-32, 11)  // centrado horizontalmente y debajo del icono
+          offset: new BMap.Size(-32, 11)
         })
 
         label.setStyle({
@@ -92,12 +91,21 @@
         map.addOverlay(label);
 
         markersWithLabels.push({ marker, label, point: poiPoint, minZoom: poi.zoom });
+
+        marker.addEventListener("click", () => {
+          if (window.WeixinJSBridge) {
+            window.WeixinJSBridge.invoke("postMessage", {
+              type: "openDescription",
+              name: poi.name
+            });
+          }
+        });
       });
 
       function updateLabelsVisibility() {
         const zoom = map.getZoom();
         const screenPoints = [];
-        const threshold = 75; // Distancia mínima en píxeles para mostrar etiquetas
+        const threshold = 100;
 
         markersWithLabels.forEach(({ marker, label, point, minZoom }) => {
           if (zoom < minZoom) {
@@ -131,7 +139,7 @@
 
       map.addEventListener("zoomend", updateLabelsVisibility);
       map.addEventListener("moveend", updateLabelsVisibility);
-      updateLabelsVisibility(); // Llamada inicial
+      updateLabelsVisibility();
     }
 
     fetchPOIs();
