@@ -26,9 +26,18 @@
       window.wechatReady = true;
     }, false);
 
-    async function fetchPOIs() {
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search)
+      return {
+        lat: parseFloat(params.get("lat")) || 40.4168,
+        lng: parseFloat(params.get("lng")) || -3.7038,
+        tourist_destination: params.get("tourist_destination") || "comunidaddemadrid"
+      }
+    }
+
+    async function fetchPOIs(tourist_destination, lat, lng) {
       try {
-        const response = await fetch("https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=comunidaddemadrid&language=en&show_hidden=false");
+        const response = await fetch(`https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`);
         const data = await response.json();
         const pois = data.features.map(f => ({
           lat: f.geometry.coordinates[1],
@@ -37,17 +46,15 @@
           icon: f.properties.icon_image,
           zoom: f.properties.zoom_level || 10
         }));
-        initMap(pois);
+        initMap(pois, lat, lng);
       } catch (err) {
         console.error("Error al obtener POIs:", err);
       }
     }
 
-    function initMap(pois) {
+    function initMap(pois, centerLat, centerLng) {
       const map = new BMap.Map("map");
-      const center = pois.length
-        ? new BMap.Point(pois[0].lng, pois[0].lat)
-        : new BMap.Point(116.404, 39.915);
+      const center = new BMap.Point(centerLng, centerLat);
       map.centerAndZoom(center, 10);
       map.enableScrollWheelZoom();
 
@@ -159,7 +166,7 @@
       updateLabelsVisibility();
     }
 
-    fetchPOIs();
+    fetchPOIs(params.tourist_destination, params.lat, params.lng);
   </script>
 </body>
 </html>
