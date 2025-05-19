@@ -9,16 +9,13 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
     #map {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      height: 100%;
+      width: 100%;
     }
   </style>
 </head>
@@ -33,11 +30,23 @@
 
     function getQueryParams() {
       const params = new URLSearchParams(window.location.search)
+
+      const boundaryParam = params.get("boundary");
+      let boundaryPoints = [];
+
+      if (boundaryParam) {
+        try {
+          boundaryPoints = JSON.parse(decodeURIComponent(boundaryParam));
+        } catch (e) {
+          console.error("Error parsing boundary:", e);
+        }
+      }
+
       return {
         lat: parseFloat(params.get("lat")) || 40.4168,
         lng: parseFloat(params.get("lng")) || -3.7038,
         zoom: parseInt(params.get("zoom")) || 10,
-        boundary: params.get("boundary") ? JSON.parse(decodeURIComponent(params.get("boundary"))) : null,
+        boundary: boundaryPoints,
         tourist_destination: params.get("tourist_destination") || "comunidaddemadrid"
       }
     }
@@ -64,22 +73,13 @@
     function initMap(pois, centerLat, centerLng, zoom, boundary) {
       const map = new BMap.Map("map");
       const center = new BMap.Point(centerLng, centerLat);
-      map.centerAndZoom(center, zoom);
-
-      if(boundary) {
-        const bounds = new BMap.Bounds(
-          new BMap.Point(boundary.xmin, boundary.ymin),
-          new BMap.Point(boundary.xmax, boundary.ymax)
-        );
-
-        map.addEventListener("dragend", () => {
-          if(!bounds.containsPoint(map.getCenter())) {
-            map.panTo(center);
-          }
-        })
-      }
-
+      map.centerAndZoom(center, zoom > 3 && zoom <= 18 ? zoom : 10);
       map.enableScrollWheelZoom();
+
+      if (boundary.length > 0) {
+        const baiduPoints = boundary.map(p => new BMap.Point(p.lng, p.lat));
+        map.setViewport(baiduPoints);
+      }
 
       map.setMapStyle({
         styleJson: [
@@ -98,6 +98,15 @@
 
       map.addControl(new BMap.NavigationControl());
       map.addControl(new BMap.ScaleControl());
+
+      if (Array.isArray(boundary) && boundary.length > 0) {
+        try {
+          const points = boundary.map(p => new BMap.Point(p.lng, p.lat));
+          map.setViewport(points);
+        } catch (e) {
+          console.warn("Error al aplicar boundary:", e);
+        }
+      }
 
       const markersWithLabels = [];
 
