@@ -35,6 +35,8 @@
       }
     }
 
+    const params = getQueryParams();
+
     async function fetchPOIs(tourist_destination, lat, lng) {
       try {
         const response = await fetch(`https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`);
