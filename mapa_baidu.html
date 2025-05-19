@@ -78,8 +78,8 @@
       map.enableScrollWheelZoom();
 
       const restrictBounds = new BMap.Bounds(
-        new BMap.Point(boundary.xmin, boundary.ymin),
-        new BMap.Point(boundary.xmax, boundary.ymax)
+        new BMap.Point(boundary.ymin, boundary.xmin),
+        new BMap.Point(boundary.ymax, boundary.xmax)
       );
 
       map.addEventListener("moveend", () => {
