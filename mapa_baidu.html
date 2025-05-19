@@ -74,7 +74,7 @@
       const map = new BMap.Map("map");
       const center = new BMap.Point(centerLng, centerLat);
       map.centerAndZoom(center, zoom);
-      map.setMaxZoom(zoom);
+      map.setMinZoom(zoom);
       map.enableScrollWheelZoom();
 
       const restrictBounds = new BMap.Bounds(
