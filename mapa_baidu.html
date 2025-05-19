@@ -78,17 +78,22 @@
       map.enableScrollWheelZoom();
 
       const restrictBounds = new BMap.Bounds(
-        new BMap.Point(boundary.ymin, boundary.xmin),
-        new BMap.Point(boundary.ymax, boundary.xmax)
+        new BMap.Point(boundary.xmin, boundary.ymin),
+        new BMap.Point(boundary.xmax, boundary.ymax)
       );
 
       map.addEventListener("moveend", () => {
-        const center = map.getCenter(); // ✅ ahora sí se actualiza dinámicamente
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+
         if (!restrictBounds.containsPoint(center)) {
-          let lng = Math.max(boundary.xmin, Math.min(boundary.xmax, center.lng));
-          let lat = Math.max(boundary.ymin, Math.min(boundary.ymax, center.lat));
-          const clampedCenter = new BMap.Point(lng, lat);
-          map.setCenter(clampedCenter);
+          // Vuelve a encuadrar dentro del área válida
+          const sw = new BMap.Point(boundary.xmin, boundary.ymin);
+          const ne = new BMap.Point(boundary.xmax, boundary.ymax);
+          map.setViewport([sw, ne]);
+        } else if (zoom > params.zoom) {
+          // Forzar que el zoom no supere el valor pasado por parámetro
+          map.setZoom(params.zoom);
         }
       });
 
