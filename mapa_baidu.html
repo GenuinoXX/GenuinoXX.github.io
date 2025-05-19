@@ -83,8 +83,6 @@
       );
 
       map.addEventListener("moveend", () => {
-        const center = map.getCenter();
-
         if (!restrictBounds.containsPoint(center)) {
           let lng = Math.max(boundary.xmin, Math.min(boundary.xmax, center.lng));
           let lat = Math.max(boundary.ymin, Math.min(boundary.ymax, center.lat));
