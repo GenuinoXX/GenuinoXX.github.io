@@ -99,15 +99,6 @@
       map.addControl(new BMap.NavigationControl());
       map.addControl(new BMap.ScaleControl());
 
-      if (Array.isArray(boundary) && boundary.length > 0) {
-        try {
-          const points = boundary.map(p => new BMap.Point(p.lng, p.lat));
-          map.setViewport(points);
-        } catch (e) {
-          console.warn("Error al aplicar boundary:", e);
-        }
-      }
-
       const markersWithLabels = [];
 
       pois.forEach(poi => {
