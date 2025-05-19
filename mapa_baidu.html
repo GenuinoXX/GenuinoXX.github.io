@@ -31,6 +31,8 @@
       return {
         lat: parseFloat(params.get("lat")) || 40.4168,
         lng: parseFloat(params.get("lng")) || -3.7038,
+        zoom: parseInt(params.get("zoom")) || 10,
+        boundary: params.get("boundary") ? JSON.parse(decodeURIComponent(params.get("boundary"))) : null,
         tourist_destination: params.get("tourist_destination") || "comunidaddemadrid"
       }
     }
@@ -54,10 +56,24 @@
       }
     }
 
-    function initMap(pois, centerLat, centerLng) {
+    function initMap(pois, centerLat, centerLng, zoom, boundary) {
       const map = new BMap.Map("map");
       const center = new BMap.Point(centerLng, centerLat);
-      map.centerAndZoom(center, 10);
+      map.centerAndZoom(center, zoom);
+
+      if(boundary) {
+        const bounds = new BMap.Bounds(
+          new BMap.Point(boundary.xmin, boundary.ymin),
+          new BMap.Point(boundary.xmax, boundary.ymax)
+        );
+
+        map.addEventListener("dragend", () => {
+          if(!bounds.containsPoint(map.getCenter())) {
+            map.panTo(center);
+          }
+        })
+      }
+
       map.enableScrollWheelZoom();
 
       map.setMapStyle({
