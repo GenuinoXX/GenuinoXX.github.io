@@ -73,7 +73,7 @@
     function initMap(pois, centerLat, centerLng, zoom, boundary) {
       const map = new BMap.Map("map");
       const center = new BMap.Point(centerLng, centerLat);
-      map.centerAndZoom(center, zoom > 3 && zoom <= 18 ? zoom : 10);
+      map.centerAndZoom(center, zoom);
       map.enableScrollWheelZoom();
 
       if (boundary.length > 0) {
