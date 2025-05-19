@@ -74,12 +74,24 @@
       const map = new BMap.Map("map");
       const center = new BMap.Point(centerLng, centerLat);
       map.centerAndZoom(center, zoom);
+      map.setMaxZoom(zoom);
       map.enableScrollWheelZoom();
 
-      if (boundary.length > 0) {
-        const baiduPoints = boundary.map(p => new BMap.Point(p.lng, p.lat));
-        map.setViewport(baiduPoints);
-      }
+      const restrictBounds = new BMap.Bounds(
+        new BMap.Point(boundary.xmin, boundary.ymin),
+        new BMap.Point(boundary.xmax, boundary.ymax)
+      );
+
+      map.addEventListener("moveend", () => {
+        const center = map.getCenter();
+
+        if (!restrictBounds.containsPoint(center)) {
+          let lng = Math.max(boundary.xmin, Math.min(boundary.xmax, center.lng));
+          let lat = Math.max(boundary.ymin, Math.min(boundary.ymax, center.lat));
+          const clampedCenter = new BMap.Point(lng, lat);
+          map.setCenter(clampedCenter);
+        }
+      });
 
       map.setMapStyle({
         styleJson: [
