@@ -86,13 +86,14 @@
         const center = map.getCenter();
         const zoom = map.getZoom();
 
+        // Si el centro está fuera del límite permitido, lo regresamos al centro original
         if (!restrictBounds.containsPoint(center)) {
-          // Vuelve a encuadrar dentro del área válida
-          const sw = new BMap.Point(boundary.xmin, boundary.ymin);
-          const ne = new BMap.Point(boundary.xmax, boundary.ymax);
-          map.setViewport([sw, ne]);
-        } else if (zoom > params.zoom) {
-          // Forzar que el zoom no supere el valor pasado por parámetro
+          const originalCenter = new BMap.Point(centerLng, centerLat);
+          map.panTo(originalCenter);
+        }
+
+        // Forzar que el zoom no supere el nivel permitido
+        if (zoom > params.zoom) {
           map.setZoom(params.zoom);
         }
       });
