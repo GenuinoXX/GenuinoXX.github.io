@@ -32,6 +32,7 @@
       const params = new URLSearchParams(window.location.search)
 
       const boundaryParam = params.get("boundary");
+      console.log("Boundary: ", boundaryParam)
       let boundaryPoints = [];
 
       if (boundaryParam) {
@@ -91,20 +92,25 @@
         }
 
         const center = map.getCenter();
+        console.log("Mapa movido. Centro actual:", center.lng, center.lat);
+
         let clampedLng = center.lng;
         let clampedLat = center.lat;
 
-        // Asegura que el nuevo punto esté dentro del boundary
         if (center.lng < boundary.xmin) clampedLng = boundary.xmin;
         if (center.lng > boundary.xmax) clampedLng = boundary.xmax;
         if (center.lat < boundary.ymin) clampedLat = boundary.ymin;
         if (center.lat > boundary.ymax) clampedLat = boundary.ymax;
 
-        // Solo mover si hubo cambio
-        if (clampedLng !== center.lng || clampedLat !== center.lat) {
-          const adjustedPoint = new BMap.Point(clampedLng, clampedLat);
+        const wasAdjusted = clampedLng !== center.lng || clampedLat !== center.lat;
+
+        if (wasAdjusted) {
+          console.log("Centro fuera de límites. Corrigiendo a:", clampedLng, clampedLat);
           isAdjusting = true;
+          const adjustedPoint = new BMap.Point(clampedLng, clampedLat);
           map.panTo(adjustedPoint);
+        } else {
+          console.log("Centro dentro del boundary. No se ajusta.");
         }
       });
 
