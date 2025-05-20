@@ -78,6 +78,23 @@
       map.setMinZoom(zoom);
       map.enableScrollWheelZoom();
 
+      // Dibujar el rectángulo del boundary en el mapa
+      const sw = new BMap.Point(boundary.xmin, boundary.ymin);
+      const ne = new BMap.Point(boundary.xmax, boundary.ymax);
+      const rectangle = new BMap.Polygon([
+        sw,
+        new BMap.Point(boundary.xmax, boundary.ymin),
+        ne,
+        new BMap.Point(boundary.xmin, boundary.ymax),
+        sw
+      ], {
+        strokeColor: "red",
+        strokeWeight: 2,
+        strokeOpacity: 0.7,
+        fillColor: "rgba(255, 0, 0, 0.05)"
+      });
+      map.addOverlay(rectangle);
+
       const restrictBounds = new BMap.Bounds(
         new BMap.Point(boundary.xmin, boundary.ymin),
         new BMap.Point(boundary.xmax, boundary.ymax)
