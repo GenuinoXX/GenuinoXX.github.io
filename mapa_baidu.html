@@ -86,21 +86,23 @@
 
       map.addEventListener("moveend", () => {
         if (isAdjusting) {
-          isAdjusting = false; // resetear para permitir futuras correcciones
-          return; // saltarse esta ejecución
+          isAdjusting = false;
+          return;
         }
 
         const center = map.getCenter();
+        let clampedLng = center.lng;
+        let clampedLat = center.lat;
 
-        if (!restrictBounds.containsPoint(center)) {
-          const centerAllowed = new BMap.Point(centerLng, centerLat);
-          const factor = 0.2;
+        // Asegura que el nuevo punto esté dentro del boundary
+        if (center.lng < boundary.xmin) clampedLng = boundary.xmin;
+        if (center.lng > boundary.xmax) clampedLng = boundary.xmax;
+        if (center.lat < boundary.ymin) clampedLat = boundary.ymin;
+        if (center.lat > boundary.ymax) clampedLat = boundary.ymax;
 
-          const newLng = center.lng + (centerAllowed.lng - center.lng) * factor;
-          const newLat = center.lat + (centerAllowed.lat - center.lat) * factor;
-
-          const adjustedPoint = new BMap.Point(newLng, newLat);
-
+        // Solo mover si hubo cambio
+        if (clampedLng !== center.lng || clampedLat !== center.lat) {
+          const adjustedPoint = new BMap.Point(clampedLng, clampedLat);
           isAdjusting = true;
           map.panTo(adjustedPoint);
         }
