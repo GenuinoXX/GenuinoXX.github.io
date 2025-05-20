@@ -82,21 +82,26 @@
         new BMap.Point(boundary.xmax, boundary.ymax)
       );
 
+      let isAdjusting = false;
+
       map.addEventListener("moveend", () => {
+        if (isAdjusting) {
+          isAdjusting = false; // resetear para permitir futuras correcciones
+          return; // saltarse esta ejecución
+        }
+
         const center = map.getCenter();
-        const zoom = map.getZoom();
 
         if (!restrictBounds.containsPoint(center)) {
-          const centerPoint = map.getCenter(); // punto actual
-          const centerAllowed = new BMap.Point(centerLng, centerLat); // centro permitido
+          const centerAllowed = new BMap.Point(centerLng, centerLat);
+          const factor = 0.2;
 
-          // Calculamos una nueva posición acercándonos un poco al centro permitido
-          const factor = 0.2; // cuánto moverse (0.0 = nada, 1.0 = volver al centro completo)
-
-          const newLng = centerPoint.lng + (centerAllowed.lng - centerPoint.lng) * factor;
-          const newLat = centerPoint.lat + (centerAllowed.lat - centerPoint.lat) * factor;
+          const newLng = center.lng + (centerAllowed.lng - center.lng) * factor;
+          const newLat = center.lat + (centerAllowed.lat - center.lat) * factor;
 
           const adjustedPoint = new BMap.Point(newLng, newLat);
+
+          isAdjusting = true;
           map.panTo(adjustedPoint);
         }
       });
