@@ -86,15 +86,18 @@
         const center = map.getCenter();
         const zoom = map.getZoom();
 
-        // Si el centro está fuera del límite permitido, lo regresamos al centro original
         if (!restrictBounds.containsPoint(center)) {
-          const originalCenter = new BMap.Point(centerLng, centerLat);
-          map.panTo(originalCenter);
-        }
+          const centerPoint = map.getCenter(); // punto actual
+          const centerAllowed = new BMap.Point(centerLng, centerLat); // centro permitido
 
-        // Forzar que el zoom no supere el nivel permitido
-        if (zoom > params.zoom) {
-          map.setZoom(params.zoom);
+          // Calculamos una nueva posición acercándonos un poco al centro permitido
+          const factor = 0.2; // cuánto moverse (0.0 = nada, 1.0 = volver al centro completo)
+
+          const newLng = centerPoint.lng + (centerAllowed.lng - centerPoint.lng) * factor;
+          const newLat = centerPoint.lat + (centerAllowed.lat - centerPoint.lat) * factor;
+
+          const adjustedPoint = new BMap.Point(newLng, newLat);
+          map.panTo(adjustedPoint);
         }
       });
 
