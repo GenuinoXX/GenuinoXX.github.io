@@ -32,12 +32,12 @@
       const params = new URLSearchParams(window.location.search)
 
       const boundaryParam = params.get("boundary");
-      console.log("Boundary: ", boundaryParam)
       let boundaryPoints = [];
 
       if (boundaryParam) {
         try {
           boundaryPoints = JSON.parse(decodeURIComponent(boundaryParam));
+          console.log("Boundary: ", boundaryPoints)
         } catch (e) {
           console.error("Error parsing boundary:", e);
         }
