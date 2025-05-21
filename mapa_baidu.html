@@ -48,15 +48,22 @@
         lng: parseFloat(params.get("lng")) || -3.7038,
         zoom: parseInt(params.get("zoom")) || 10,
         boundary: boundaryPoints,
-        tourist_destination: params.get("tourist_destination") || "comunidaddemadrid"
+        tourist_destination: params.get("tourist_destination") || "comunidaddemadrid",
+        tourist_type: params.get("tourist_type") || ""
       }
     }
 
     const params = getQueryParams();
 
-    async function fetchPOIs(tourist_destination, latGeneral, lngGeneral, zoomGeneral, boundary) {
+    async function fetchPOIs(tourist_destination, latGeneral, lngGeneral, zoomGeneral, boundary, tourist_type) {
+      if(tourist_type) {
+        const api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false&tourist_type_or=${tourist_type}`;
+      }else {
+        const api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`;
+      }
+
       try {
-        const response = await fetch(`https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`);
+        const response = await fetch(api);
         const data = await response.json();
         const pois = data.features.map(f => ({
           lat: f.geometry.coordinates[1],
