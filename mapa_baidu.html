@@ -246,7 +246,11 @@
       updateLabelsVisibility();
     }
 
-    fetchPOIs(params.tourist_destination, params.lat, params.lng, params.zoom, params.boundary);
+    if (params.tourist_type != "") {
+      fetchPOIs(params.tourist_destination, params.lat, params.lng, params.zoom, params.boundary, params.tourist_type);
+    }else {
+      fetchPOIs(params.tourist_destination, params.lat, params.lng, params.zoom, params.boundary, null);
+    }
   </script>
 </body>
 </html>
