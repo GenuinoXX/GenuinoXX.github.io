@@ -56,10 +56,12 @@
     const params = getQueryParams();
 
     async function fetchPOIs(tourist_destination, latGeneral, lngGeneral, zoomGeneral, boundary, tourist_type) {
+      const api =``;
+      
       if(tourist_type) {
-        const api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false&tourist_type_or=${tourist_type}`;
+        api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false&tourist_type_or=${tourist_type}`;
       }else {
-        const api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`;
+        api= `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`;
       }
 
       try {
