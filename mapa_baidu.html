@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mapa Baidu</title>
   <script src="https://api.map.baidu.com/api?v=3.0&ak=1Vkcxd0Q6iomR9TI8zNfzhwXWdeBYAd2"></script>
-  <script src="https://api.map.baidu.com/library/MarkerClusterer/1.2/src/MarkerClusterer_min.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -18,22 +17,42 @@
       height: 100%;
       width: 100%;
     }
+    .cluster-count {
+      background-color: orange;
+      border-radius: 50%;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      line-height: 32px;
+      text-align: center;
+      width: 32px;
+      height: 32px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <script>
+    window.wechatReady = false;
+    document.addEventListener('WeixinJSBridgeReady', function () {
+      window.wechatReady = true;
+    }, false);
+
     function getQueryParams() {
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(window.location.search)
       const boundaryParam = params.get("boundary");
       let boundaryPoints = [];
+
       if (boundaryParam) {
         try {
           boundaryPoints = JSON.parse(decodeURIComponent(boundaryParam));
+          console.log("Boundary: ", boundaryPoints)
         } catch (e) {
           console.error("Error parsing boundary:", e);
         }
       }
+
       return {
         lat: parseFloat(params.get("lat")) || 40.4168,
         lng: parseFloat(params.get("lng")) || -3.7038,
@@ -41,19 +60,19 @@
         boundary: boundaryPoints,
         tourist_destination: params.get("tourist_destination") || "comunidaddemadrid",
         tourist_type: params.get("tourist_type") || ""
-      };
+      }
     }
 
     const params = getQueryParams();
 
-    async function fetchPOIs(dest, lat, lng, zoom, boundary, type) {
-      let api = type
-        ? `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${dest}&language=en&show_hidden=false&tourist_type_or=${type}`
-        : `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${dest}&language=en&show_hidden=false`;
+    async function fetchPOIs(tourist_destination, latGeneral, lngGeneral, zoomGeneral, boundary, tourist_type) {
+      let api = tourist_type
+        ? `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false&tourist_type_or=${tourist_type}`
+        : `https://api.inventrip.com/v100/map-poi-geojson?api_key=C0munid%40dDeM%40dr%21d&tourist_destination=${tourist_destination}&language=en&show_hidden=false`;
 
       try {
-        const res = await fetch(api);
-        const data = await res.json();
+        const response = await fetch(api);
+        const data = await response.json();
         const pois = data.features.map(f => ({
           lat: f.geometry.coordinates[1],
           lng: f.geometry.coordinates[0],
@@ -61,7 +80,7 @@
           icon: f.properties.icon_image,
           zoom: f.properties.zoom_level || 10
         }));
-        initMap(pois, lat, lng, zoom, boundary);
+        initMap(pois, latGeneral, lngGeneral, zoomGeneral, boundary);
       } catch (err) {
         console.error("Error al obtener POIs:", err);
       }
@@ -74,17 +93,50 @@
       map.setMinZoom(zoom);
       map.enableScrollWheelZoom();
 
-      const markers = [];
-      const labelMap = new Map();
+      const restrictBounds = new BMap.Bounds(
+        new BMap.Point(boundary.xmin, boundary.ymin),
+        new BMap.Point(boundary.xmax, boundary.ymax)
+      );
+
+      let isAdjusting = false;
+      map.addEventListener("moveend", () => {
+        if (isAdjusting) {
+          isAdjusting = false;
+          return;
+        }
+
+        const center = map.getCenter();
+        let clampedLng = center.lng;
+        let clampedLat = center.lat;
+
+        if (center.lng < boundary.xmin) clampedLng = boundary.xmin;
+        if (center.lng > boundary.xmax) clampedLng = boundary.xmax;
+        if (center.lat < boundary.ymin) clampedLat = boundary.ymin;
+        if (center.lat > boundary.ymax) clampedLat = boundary.ymax;
+
+        const wasAdjusted = clampedLng !== center.lng || clampedLat !== center.lat;
+
+        if (wasAdjusted) {
+          isAdjusting = true;
+          const adjustedPoint = new BMap.Point(clampedLng, clampedLat);
+          map.panTo(adjustedPoint);
+        }
+      });
+
+      map.addControl(new BMap.NavigationControl());
+      map.addControl(new BMap.ScaleControl());
+
+      const markersWithLabels = [];
+      const clusterMarkers = [];
 
       pois.forEach(poi => {
-        const point = new BMap.Point(poi.lng, poi.lat);
+        const poiPoint = new BMap.Point(poi.lng, poi.lat);
         const icon = new BMap.Icon(poi.icon, new BMap.Size(32, 32));
-        const marker = new BMap.Marker(point, { icon });
-        marker.setTitle(poi.name);
+        const marker = new BMap.Marker(poiPoint, { icon });
+        map.addOverlay(marker);
 
         const label = new BMap.Label(poi.name, {
-          position: point,
+          position: poiPoint,
           offset: new BMap.Size(-32, 11)
         });
 
@@ -101,7 +153,6 @@
         });
 
         map.addOverlay(label);
-        labelMap.set(marker, label);
 
         marker.addEventListener("click", () => {
           const message = {
@@ -116,41 +167,98 @@
           }
         });
 
-        markers.push(marker);
+        markersWithLabels.push({ marker, label, point: poiPoint, minZoom: poi.zoom });
       });
 
-      const clusterer = new BMapLib.MarkerClusterer(map, {
-        markers,
-        gridSize: 80,
-        maxZoom: 15,
-        styles: [{
-          url: "https://api.map.baidu.com/library/MarkerClusterer/1.2/images/cluster.png",
-          size: new BMap.Size(53, 52),
-          textColor: "#fff",
-          textSize: 14
-        }]
-      });
+      function updateLabelsVisibility() {
+        const zoom = map.getZoom();
+        const screenPoints = [];
+        const threshold = 100;
 
-      function updateLabelVisibility() {
-        const currentZoom = map.getZoom();
-        for (const [marker, label] of labelMap.entries()) {
-          currentZoom >= 13 ? label.show() : label.hide();
+        // Limpiar clusters anteriores
+        clusterMarkers.forEach(marker => map.removeOverlay(marker));
+        clusterMarkers.length = 0;
+
+        const clusterGrid = {};
+        const gridSize = 80;
+
+        markersWithLabels.forEach(({ marker, label, point, minZoom }) => {
+          if (zoom < minZoom) {
+            marker.hide();
+            label.hide();
+
+            const pixel = map.pointToPixel(point);
+            const keyX = Math.floor(pixel.x / gridSize);
+            const keyY = Math.floor(pixel.y / gridSize);
+            const key = `${keyX},${keyY}`;
+
+            if (!clusterGrid[key]) {
+              clusterGrid[key] = {
+                count: 0,
+                points: [],
+                centerX: 0,
+                centerY: 0
+              };
+            }
+
+            const cluster = clusterGrid[key];
+            cluster.count++;
+            cluster.points.push(point);
+            cluster.centerX += pixel.x;
+            cluster.centerY += pixel.y;
+          } else {
+            marker.show();
+
+            const screenPoint = map.pointToPixel(point);
+            const tooClose = screenPoints.some(existing => {
+              const dx = existing.x - screenPoint.x;
+              const dy = existing.y - screenPoint.y;
+              return Math.sqrt(dx * dx + dy * dy) < threshold;
+            });
+
+            if (!tooClose) {
+              screenPoints.push(screenPoint);
+              label.show();
+            } else {
+              label.hide();
+            }
+          }
+        });
+
+        for (const key in clusterGrid) {
+          const cluster = clusterGrid[key];
+          if (cluster.count === 0) continue;
+
+          const avgX = cluster.centerX / cluster.count;
+          const avgY = cluster.centerY / cluster.count;
+          const avgPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
+
+          const div = document.createElement("div");
+          div.className = "cluster-count";
+          div.innerText = cluster.count;
+
+          const clusterMarker = new BMap.Marker(avgPoint);
+
+          clusterMarker.setLabel(new BMap.Label(div, {
+            position: avgPoint,
+            offset: new BMap.Size(-16, -16)
+          }));
+
+          clusterMarker.addEventListener("click", () => {
+            map.centerAndZoom(avgPoint, zoom + 2); // Zoom-in al hacer clic
+          });
+
+          map.addOverlay(clusterMarker);
+          clusterMarkers.push(clusterMarker);
         }
       }
 
-      map.addEventListener("zoomend", updateLabelVisibility);
-      map.addEventListener("moveend", updateLabelVisibility);
-      updateLabelVisibility();
+      map.addEventListener("zoomend", updateLabelsVisibility);
+      map.addEventListener("moveend", updateLabelsVisibility);
+      updateLabelsVisibility();
     }
 
-    fetchPOIs(
-      params.tourist_destination,
-      params.lat,
-      params.lng,
-      params.zoom,
-      params.boundary,
-      params.tourist_type || null
-    );
+    fetchPOIs(params.tourist_destination, params.lat, params.lng, params.zoom, params.boundary, params.tourist_type || null);
   </script>
 </body>
 </html>
