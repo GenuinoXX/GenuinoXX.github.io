@@ -123,13 +123,6 @@
         }
       });
 
-      map.setMapStyle({
-        styleJson: [
-          { "featureType": "poi", "elementType": "all", "visibility": "off" },
-          { "featureType": "land", "elementType": "labels", "visibility": "off" }
-        ]
-      });
-
       map.addControl(new BMap.NavigationControl());
       map.addControl(new BMap.ScaleControl());
 
@@ -244,9 +237,7 @@
           div.className = "cluster-count";
           div.innerText = cluster.count;
 
-          const clusterMarker = new BMap.Marker(avgPoint, {
-            icon: new BMap.Icon("", new BMap.Size(0, 0))
-          });
+          const clusterMarker = new BMap.Marker(avgPoint);
 
           clusterMarker.setLabel(new BMap.Label(div, {
             position: avgPoint,
