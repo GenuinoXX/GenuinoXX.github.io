@@ -230,9 +230,12 @@
           const avgY = cluster.sumY / cluster.count;
           const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
 
-          const transparentIcon = new BMap.Icon('', new BMap.Size(1, 1));
+          const transparentIcon = new BMap.Icon(
+            "https://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif",
+            new BMap.Size(1, 1)
+          );
           const clusterMarker = new BMap.Marker(centerPoint, { icon: transparentIcon });
-          
+
           const clusterLabel = new BMap.Label(cluster.count.toString(), {
             position: centerPoint,
             offset: new BMap.Size(-16, -16)
