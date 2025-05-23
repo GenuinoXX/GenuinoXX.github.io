@@ -230,15 +230,27 @@
           const avgY = cluster.sumY / cluster.count;
           const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
 
-          const div = document.createElement("div");
-          div.className = "cluster-count";
-          div.textContent = cluster.count;
-
           const clusterMarker = new BMap.Marker(centerPoint);
-          clusterMarker.setLabel(new BMap.Label(div, {
+          const clusterLabel = new BMap.Label(cluster.count.toString(), {
             position: centerPoint,
             offset: new BMap.Size(-16, -16)
-          }));
+          });
+
+          clusterLabel.setStyle({
+            backgroundColor: "orange",
+            borderRadius: "50%",
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "12px",
+            lineHeight: "32px",
+            textAlign: "center",
+            width: "32px",
+            height: "32px",
+            boxShadow: "0 0 5px rgba(0,0,0,0.5)",
+            border: "none"
+          });
+
+          clusterMarker.setLabel(clusterLabel);
 
           clusterMarker.addEventListener("click", () => {
             map.centerAndZoom(centerPoint, zoom + 2);
