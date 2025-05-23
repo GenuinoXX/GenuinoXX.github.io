@@ -175,49 +175,46 @@
         const screenPoints = [];
         const threshold = 100;
 
-        // Limpiar clusters anteriores
         clusterMarkers.forEach(marker => map.removeOverlay(marker));
         clusterMarkers.length = 0;
 
-        const clusterGrid = {};
         const gridSize = 80;
+        const clusterGrid = {};
 
         markersWithLabels.forEach(({ marker, label, point, minZoom }) => {
+          const pixel = map.pointToPixel(point);
+          const keyX = Math.floor(pixel.x / gridSize);
+          const keyY = Math.floor(pixel.y / gridSize);
+          const key = `${keyX},${keyY}`;
+
           if (zoom < minZoom) {
             marker.hide();
             label.hide();
-
-            const pixel = map.pointToPixel(point);
-            const keyX = Math.floor(pixel.x / gridSize);
-            const keyY = Math.floor(pixel.y / gridSize);
-            const key = `${keyX},${keyY}`;
 
             if (!clusterGrid[key]) {
               clusterGrid[key] = {
                 count: 0,
                 points: [],
-                centerX: 0,
-                centerY: 0
+                sumX: 0,
+                sumY: 0
               };
             }
 
-            const cluster = clusterGrid[key];
-            cluster.count++;
-            cluster.points.push(point);
-            cluster.centerX += pixel.x;
-            cluster.centerY += pixel.y;
+            clusterGrid[key].count++;
+            clusterGrid[key].points.push(point);
+            clusterGrid[key].sumX += pixel.x;
+            clusterGrid[key].sumY += pixel.y;
           } else {
             marker.show();
 
-            const screenPoint = map.pointToPixel(point);
             const tooClose = screenPoints.some(existing => {
-              const dx = existing.x - screenPoint.x;
-              const dy = existing.y - screenPoint.y;
+              const dx = existing.x - pixel.x;
+              const dy = existing.y - pixel.y;
               return Math.sqrt(dx * dx + dy * dy) < threshold;
             });
 
             if (!tooClose) {
-              screenPoints.push(screenPoint);
+              screenPoints.push(pixel);
               label.show();
             } else {
               label.hide();
@@ -227,25 +224,24 @@
 
         for (const key in clusterGrid) {
           const cluster = clusterGrid[key];
-          if (cluster.count === 0) continue;
+          if (cluster.count < 2) continue;
 
-          const avgX = cluster.centerX / cluster.count;
-          const avgY = cluster.centerY / cluster.count;
-          const avgPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
+          const avgX = cluster.sumX / cluster.count;
+          const avgY = cluster.sumY / cluster.count;
+          const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
 
           const div = document.createElement("div");
           div.className = "cluster-count";
-          div.innerText = cluster.count;
+          div.textContent = cluster.count;
 
-          const clusterMarker = new BMap.Marker(avgPoint);
-
+          const clusterMarker = new BMap.Marker(centerPoint);
           clusterMarker.setLabel(new BMap.Label(div, {
-            position: avgPoint,
+            position: centerPoint,
             offset: new BMap.Size(-16, -16)
           }));
 
           clusterMarker.addEventListener("click", () => {
-            map.centerAndZoom(avgPoint, zoom + 2); // Zoom-in al hacer clic
+            map.centerAndZoom(centerPoint, zoom + 2);
           });
 
           map.addOverlay(clusterMarker);
