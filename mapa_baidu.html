@@ -257,9 +257,12 @@
 
           clusterMarker.setLabel(clusterLabel);
 
-          clusterMarker.addEventListener("click", () => {
+          const zoomOnCluster = () => {
             map.centerAndZoom(centerPoint, zoom + 2);
-          });
+          };
+
+          clusterMarker.addEventListener("click", zoomOnCluster);
+          clusterLabel.addEventListener("click", zoomOnCluster);
 
           map.addOverlay(clusterMarker);
           clusterMarkers.push(clusterMarker);
