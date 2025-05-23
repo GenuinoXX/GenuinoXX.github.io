@@ -196,9 +196,7 @@
                 count: 0,
                 points: [],
                 sumX: 0,
-                sumY: 0,
-                keyX,
-                keyY
+                sumY: 0
               };
             }
 
@@ -230,12 +228,7 @@
 
           const avgX = cluster.sumX / cluster.count;
           const avgY = cluster.sumY / cluster.count;
-
-          // Añadimos un pequeño desplazamiento para evitar superposición visual
-          const offsetX = 15 * ((cluster.keyX % 3) - 1); // -15, 0, 15
-          const offsetY = 15 * ((cluster.keyY % 3) - 1); // -15, 0, 15
-
-          const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX + offsetX, avgY + offsetY));
+          const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
 
           const transparentIcon = new BMap.Icon(
             "https://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif",
