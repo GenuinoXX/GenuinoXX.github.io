@@ -228,7 +228,13 @@
 
           const avgX = cluster.sumX / cluster.count;
           const avgY = cluster.sumY / cluster.count;
-          const centerPoint = map.pixelToPoint(new BMap.Pixel(avgX, avgY));
+          const offsetX = 20 * ((keyX % 3) - 1); // -20, 0, +20
+          const offsetY = 20 * ((keyY % 3) - 1); // -20, 0, +20
+
+          const shiftedX = avgX + offsetX;
+          const shiftedY = avgY + offsetY;
+
+          const centerPoint = map.pixelToPoint(new BMap.Pixel(shiftedX, shiftedY));
 
           const transparentIcon = new BMap.Icon(
             "https://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif",
